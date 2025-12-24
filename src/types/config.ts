@@ -49,11 +49,7 @@ export interface CUIConfig {
    */
   server: ServerConfig;
 
-  /**
-   * Authentication token for API access
-   * 32-character random string generated on first run
-   */
-  authToken: string;
+  // Authentication token removed - no longer needed
 
   /**
    * Gemini API configuration (optional)
@@ -74,7 +70,7 @@ export interface CUIConfig {
 /**
  * Default configuration values
  */
-export const DEFAULT_CONFIG: Omit<CUIConfig, 'machine_id' | 'authToken'> = {
+export const DEFAULT_CONFIG: Omit<CUIConfig, 'machine_id'> = {
   server: {
     host: 'localhost',
     port: 3001

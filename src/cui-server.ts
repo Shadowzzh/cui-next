@@ -42,7 +42,6 @@ import { errorHandler } from './middleware/error-handler.js';
 import { requestLogger } from './middleware/request-logger.js';
 import { createCorsMiddleware } from './middleware/cors-setup.js';
 import { queryParser } from './middleware/query-parser.js';
-// Authentication middleware removed - no longer needed
 
 // ViteExpress will be imported dynamically in initialize() if needed
 let ViteExpress: typeof import('vite-express') | undefined;
@@ -215,8 +214,6 @@ export class CUIServer {
       displayServerStartup({
         host: this.host,
         port: this.port,
-        authToken: undefined, // No authentication required
-        skipAuthToken: true,   // Always skip authentication
         logger: this.logger
       });
 

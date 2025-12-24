@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
-import crypto from 'crypto';
+// crypto import removed - no longer needed
 import { CUIConfig, DEFAULT_CONFIG, InterfaceConfig, ServerConfig } from '@/types/config.js';
 import { generateMachineId } from '@/utils/machine-id.js';
 import { createLogger, type Logger } from './logger.js';
@@ -94,14 +94,11 @@ export class ConfigService {
       const machineId = await generateMachineId();
       this.logger.debug('Generated machine ID', { machineId });
 
-      // Generate crypto-secure auth token
-      const authToken = crypto.randomBytes(16).toString('hex'); // 32 character hex string
-      this.logger.debug('Generated auth token', { tokenLength: authToken.length });
+      // Auth token generation removed - no longer needed
 
       // Create default config
       const config: CUIConfig = {
         machine_id: machineId,
-        authToken,
         ...DEFAULT_CONFIG
       };
 
@@ -127,9 +124,9 @@ export class ConfigService {
   private async loadConfig(): Promise<void> {
     try {
       const configData = fs.readFileSync(this.configPath, 'utf-8');
-      let fileConfig: Partial<CUIConfig> & { machine_id?: string; authToken?: string };
+      let fileConfig: Partial<CUIConfig> & { machine_id?: string };
       try {
-        fileConfig = JSON.parse(configData) as Partial<CUIConfig> & { machine_id?: string; authToken?: string };
+        fileConfig = JSON.parse(configData) as Partial<CUIConfig> & { machine_id?: string };
       } catch (_parseError) {
         // Corrupted JSON should fail startup
         throw new Error('Invalid JSON in configuration file');
@@ -147,7 +144,6 @@ export class ConfigService {
         ...fileConfig,
         // Ensure required identifiers are set from file
         machine_id: fileConfig.machine_id || (await generateMachineId()),
-        authToken: fileConfig.authToken || crypto.randomBytes(16).toString('hex'),
         // Deep-merge known nested sections to ensure defaults are filled without dropping user values
         server: { ...DEFAULT_CONFIG.server, ...(fileConfig.server || {}) },
         interface: { ...DEFAULT_CONFIG.interface, ...(fileConfig.interface || {}) }
@@ -157,7 +153,7 @@ export class ConfigService {
       if (!fileConfig.server || JSON.stringify(merged.server) !== JSON.stringify(fileConfig.server)) updated = true;
       if (!fileConfig.interface || JSON.stringify(merged.interface) !== JSON.stringify(fileConfig.interface)) updated = true;
       if (!fileConfig.machine_id) updated = true;
-      if (!fileConfig.authToken) updated = true;
+      // Auth token check removed
 
       // Final validation on fully merged config
       this.validateCompleteConfig(merged);
@@ -210,7 +206,6 @@ export class ConfigService {
       ? { ...(current.gemini || {}), ...updates.gemini }
       : current.gemini;
 
-    // Preserve machine_id and authToken regardless of updates
     const newConfig: CUIConfig = {
       ...current,
       server: mergedServer,
@@ -222,7 +217,7 @@ export class ConfigService {
     // Update in-memory config
     const prev = this.config;
     this.config = newConfig;
-    
+
     // Write to file
     try {
       this.lastLoadedRaw = JSON.stringify(this.config, null, 2);
@@ -268,12 +263,9 @@ export class ConfigService {
         throw new Error('Invalid config: gemini.model must be a string');
       }
     }
-    // machine_id/authToken if present must be strings
+    // machine_id if present must be a string
     if (partial.machine_id !== undefined && typeof partial.machine_id !== 'string') {
       throw new Error('Invalid config: machine_id must be a string');
-    }
-    if (partial.authToken !== undefined && typeof partial.authToken !== 'string') {
-      throw new Error('Invalid config: authToken must be a string');
     }
   }
 
@@ -286,9 +278,6 @@ export class ConfigService {
       throw new Error('Invalid config: missing machine_id');
     }
     this.assertServerConfig(config.server);
-    if (!config.authToken || typeof config.authToken !== 'string') {
-      throw new Error('Invalid config: missing authToken');
-    }
     if (config.interface) {
       this.assertInterfaceConfig(config.interface);
     }
@@ -395,7 +384,7 @@ export class ConfigService {
       if (this.lastLoadedRaw && newRaw === this.lastLoadedRaw) {
         return; // No effective change
       }
-      let parsed: Partial<CUIConfig> & { machine_id?: string; authToken?: string };
+      let parsed: Partial<CUIConfig> & { machine_id?: string };
       try {
         parsed = JSON.parse(newRaw);
       } catch (_e) {
@@ -405,7 +394,7 @@ export class ConfigService {
       // Validate provided fields strictly
       this.validateProvidedFields(parsed);
       // Merge and validate complete
-      const current = this.config || ({ ...DEFAULT_CONFIG, machine_id: '', authToken: '' } as unknown as CUIConfig);
+      const current = this.config || ({ ...DEFAULT_CONFIG, machine_id: '' } as unknown as CUIConfig);
       const merged: CUIConfig = {
         ...DEFAULT_CONFIG,
         ...current,
@@ -414,8 +403,7 @@ export class ConfigService {
         interface: { ...DEFAULT_CONFIG.interface, ...(current.interface || {}), ...(parsed.interface || {}) },
         router: parsed.router !== undefined ? (parsed.router as CUIConfig['router']) : current.router,
         gemini: parsed.gemini !== undefined ? (parsed.gemini as CUIConfig['gemini']) : current.gemini,
-        machine_id: parsed.machine_id || current.machine_id,
-        authToken: parsed.authToken || current.authToken
+        machine_id: parsed.machine_id || current.machine_id
       };
       this.validateCompleteConfig(merged);
       const prev = this.config;
