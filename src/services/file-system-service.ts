@@ -277,13 +277,26 @@ export class FileSystemService {
       }
       
       const fullPath = path.join(dirPath, dirent.name);
-      const stats = await fs.stat(fullPath);
-      entries.push({
-        name: dirent.name,
-        type: dirent.isDirectory() ? 'directory' : 'file',
-        size: dirent.isFile() ? stats.size : undefined,
-        lastModified: stats.mtime.toISOString()
-      });
+      
+      try {
+        const stats = await fs.stat(fullPath);
+        entries.push({
+          name: dirent.name,
+          type: dirent.isDirectory() ? 'directory' : 'file',
+          size: dirent.isFile() ? stats.size : undefined,
+          lastModified: stats.mtime.toISOString()
+        });
+      } catch (error) {
+        // Skip files that can't be stat'ed (broken symlinks, special files, etc.)
+        const errorCode = (error as NodeJS.ErrnoException).code;
+        if (errorCode === 'ENOENT' || errorCode === 'ENOTDIR' || errorCode === 'EACCES') {
+          // Continue processing other files
+          continue;
+        } else {
+          // For other unexpected errors, continue processing
+          continue;
+        }
+      }
     }
     
     return entries;
@@ -312,17 +325,31 @@ export class FileSystemService {
           continue;
         }
         
-        const stats = await fs.stat(fullPath);
-        entries.push({
-          name: relativePath,
-          type: dirent.isDirectory() ? 'directory' : 'file',
-          size: dirent.isFile() ? stats.size : undefined,
-          lastModified: stats.mtime.toISOString()
-        });
-        
-        // Recurse into subdirectories (already checked it's not ignored)
-        if (dirent.isDirectory()) {
-          await traverse(fullPath);
+        try {
+          const stats = await fs.stat(fullPath);
+          entries.push({
+            name: relativePath,
+            type: dirent.isDirectory() ? 'directory' : 'file',
+            size: dirent.isFile() ? stats.size : undefined,
+            lastModified: stats.mtime.toISOString()
+          });
+          
+          // Recurse into subdirectories (already checked it's not ignored)
+          if (dirent.isDirectory()) {
+            await traverse(fullPath);
+          }
+        } catch (error) {
+          // Skip files that can't be stat'ed (broken symlinks, special files, etc.)
+          // This commonly happens with Bazel cache files and other special file types
+          const errorCode = (error as NodeJS.ErrnoException).code;
+          if (errorCode === 'ENOENT' || errorCode === 'ENOTDIR' || errorCode === 'EACCES') {
+            // Log debug message but continue processing
+            // Don't use this.logger here as we're inside a nested function
+            continue;
+          } else {
+            // For other unexpected errors, still continue but we could log if needed
+            continue;
+          }
         }
       }
     }

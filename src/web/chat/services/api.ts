@@ -12,7 +12,6 @@ import type {
   FileSystemListResponse,
   CommandsResponse,
 } from '../types';
-import { getAuthToken } from '../../hooks/useAuth';
 type GeminiHealthResponse = { status: 'healthy' | 'unhealthy'; message: string; apiKeyValid: boolean };
 
 class ApiService {
@@ -28,15 +27,9 @@ class ApiService {
     // Log request
     console.log(`[API] ${method} ${fullUrl}`, options?.body ? JSON.parse(options.body as string) : '');
     
-    // Get auth token for Bearer authorization
-    const authToken = getAuthToken();
+    // Set up headers without authentication
     const headers = new Headers(options?.headers as HeadersInit);
     headers.set('Content-Type', 'application/json');
-    
-    // Add Bearer token if available
-    if (authToken) {
-      headers.set('Authorization', `Bearer ${authToken}`);
-    }
     
     try {
       const response = await fetch(fullUrl, {
@@ -55,9 +48,6 @@ class ApiService {
         console.error(`[API Error] Response body preview:`, text.substring(0, 200));
 
         if (!response.ok) {
-          if (response.status === 401) {
-            throw new Error('Unauthorized - Please ensure you are logged in with the correct token');
-          }
           throw new Error(`HTTP ${response.status}: Server returned ${contentType} instead of JSON`);
         }
         throw new Error(`Expected JSON response but got ${contentType}`);
@@ -69,9 +59,6 @@ class ApiService {
       console.log(`[API Response] ${fullUrl}:`, data);
 
       if (!response.ok) {
-        if (response.status === 401) {
-          throw new Error('Unauthorized - Please ensure you are logged in with the correct token');
-        }
         throw new Error((data as ApiError).error || `HTTP ${response.status}`);
       }
 
@@ -260,16 +247,11 @@ class ApiService {
     });
   }
 
-  // For endpoints that need direct fetch with auth (like SSE streams)
+  // For endpoints that need direct fetch (like SSE streams)
   async fetchWithAuth(url: string, options?: RequestInit): Promise<Response> {
-    const authToken = getAuthToken();
     const headers: Record<string, string> = {
       ...options?.headers as Record<string, string>,
     };
-    
-    if (authToken) {
-      headers.Authorization = `Bearer ${authToken}`;
-    }
     
     return fetch(url, {
       ...options,

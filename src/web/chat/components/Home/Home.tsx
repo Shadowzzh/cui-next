@@ -9,16 +9,16 @@ import { TaskList } from './TaskList';
 
 export function Home() {
   const navigate = useNavigate();
-  const { 
-    conversations, 
-    loading, 
-    loadingMore, 
-    hasMore, 
-    error, 
-    loadConversations, 
+  const {
+    conversations,
+    loading,
+    loadingMore,
+    hasMore,
+    error,
+    loadConversations,
     loadMoreConversations,
     recentDirectories,
-    getMostRecentWorkingDirectory 
+    getMostRecentWorkingDirectory
   } = useConversations();
   const [activeTab, setActiveTab] = useState<'tasks' | 'history' | 'archive'>('tasks');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -50,12 +50,12 @@ export function Home() {
     if (conversationCountRef.current > 0) {
       loadConversations(conversationCountRef.current, getFiltersForTab(activeTab));
     }
-    
+
     // Focus the input after a brief delay to ensure DOM is ready
     const timer = setTimeout(() => {
       composerRef.current?.focusInput();
     }, 100);
-    
+
     return () => clearTimeout(timer);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Empty dependency array means this runs only on mount
@@ -93,13 +93,13 @@ export function Home() {
   }, [loadConversations, activeTab]);
 
   // Get the most recent working directory from conversations
-  const recentWorkingDirectory = conversations.length > 0 
-    ? conversations[0].projectPath 
+  const recentWorkingDirectory = conversations.length > 0
+    ? conversations[0].projectPath
     : undefined;
 
   const handleComposerSubmit = async (text: string, workingDirectory: string, model: string, permissionMode: string) => {
     setIsSubmitting(true);
-    
+
     try {
       const response = await api.startConversation({
         workingDirectory,
@@ -107,7 +107,7 @@ export function Home() {
         model: model === 'default' ? undefined : model,
         permissionMode: permissionMode === 'default' ? undefined : permissionMode,
       });
-      
+
       // Navigate to the conversation page
       navigate(`/c/${response.sessionId}`);
     } catch (error) {
@@ -127,24 +127,11 @@ export function Home() {
           <div className="z-0 mx-auto flex flex-col w-full max-w-3xl h-full">
             <div className="sticky top-0 z-50 flex flex-col items-center bg-background">
               <div className="flex items-center gap-3 mb-4 pt-4">
-                <div className="flex items-center">
-                  <div className="w-[27px] h-[27px] flex items-center justify-center">
-                    <svg width="24" height="24" viewBox="4.5 5.2 11.7 13.3" fill="currentColor">
-                      <circle cx="10.3613" cy="6.44531" r="1.03516" />
-                      <circle cx="5.69336" cy="9.15039" r="1.03516" />
-                      <circle cx="15.0195" cy="9.15039" r="1.03516" />
-                      <circle cx="5.69336" cy="14.5801" r="1.03516" />
-                      <circle cx="15.0195" cy="14.5801" r="1.03516" />
-                      <circle cx="10.3613" cy="17.2754" r="1.03516" />
-                      <path d="M10.3613 13.4961C11.2695 13.4961 11.9922 12.7734 11.9922 11.8652C11.9922 10.9668 11.25 10.2344 10.3613 10.2344C9.47266 10.2344 8.73047 10.9766 8.73047 11.8652C8.73047 12.7539 9.46289 13.4961 10.3613 13.4961Z" />
-                    </svg>
-                  </div>
-                </div>
                 <h1 className="text-2xl font-semibold font-sans text-foreground">What is the next task?</h1>
               </div>
-              
+
               <div className="w-full">
-                <Composer 
+                <Composer
                   ref={composerRef}
                   workingDirectory={recentWorkingDirectory}
                   onSubmit={handleComposerSubmit}
@@ -182,13 +169,13 @@ export function Home() {
                 />
               </div>
 
-              <TaskTabs 
+              <TaskTabs
                 activeTab={activeTab}
                 onTabChange={setActiveTab}
               />
             </div>
 
-            <TaskList 
+            <TaskList
               conversations={conversations}
               loading={loading}
               loadingMore={loadingMore}
