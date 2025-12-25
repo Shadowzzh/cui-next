@@ -37,9 +37,20 @@ export function useConversationMessages(options: UseConversationMessagesOptions 
     setExpandedTasks(new Set());
   }, []);
 
-  // Add a message
+  // Add or update a message (for streaming support)
   const addMessage = useCallback((message: ChatMessage) => {
     setMessages((prev) => {
+      // Check if message with same id already exists (for streaming updates)
+      if (message.id) {
+        const existingIndex = prev.findIndex((m) => m.id === message.id);
+        if (existingIndex !== -1) {
+          // Update existing message (streaming update)
+          const updated = [...prev];
+          updated[existingIndex] = message;
+          return updated;
+        }
+      }
+      // Add new message
       return [...prev, message];
     });
 
@@ -74,18 +85,15 @@ export function useConversationMessages(options: UseConversationMessagesOptions 
           // Stream connected
           break;
 
-        case 'system_init':
-          // Capture working directory from system init
-          setCurrentWorkingDirectory(event.cwd);
-          break;
-
-        case 'user':
+        case 'user': {
           // Process tool results first - if this message contains tool results, handle them and return early
           if (event.message && Array.isArray(event.message.content)) {
             const toolResultUpdates: Record<string, ToolResult> = {};
             let hasToolResults = false;
 
-            event.message.content.forEach((block) => {
+            // Type assertion: UserStreamMessage.message.content is ContentBlockParam[]
+            const contentBlocks = event.message.content as ContentBlockParam[];
+            contentBlocks.forEach((block) => {
               if (block.type === 'tool_result' && 'tool_use_id' in block) {
                 hasToolResults = true;
                 const toolUseId = block.tool_use_id;
@@ -122,7 +130,7 @@ export function useConversationMessages(options: UseConversationMessagesOptions 
               id: '',
               messageId: `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
               type: 'user',
-              content: event.message.content,
+              content: event.message.content as any,
               timestamp: new Date().toISOString(),
               workingDirectory: currentWorkingDirectory,
               parentToolUseId: userParentToolUseId,
@@ -140,24 +148,26 @@ export function useConversationMessages(options: UseConversationMessagesOptions 
           // Note: Regular user messages are handled via optimistic update in ConversationView
           // when sending a message, so we don't need to handle them here from SSE events
           break;
+        }
 
         case 'assistant': {
           // Check if this is a child message
           const parentToolUseId = event.parent_tool_use_id;
-          const assistantMessage: ChatMessage = {
-            id: event.message.id,
-            messageId: `assistant-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-            type: 'assistant',
-            content: Array.isArray(event.message.content)
-              ? event.message.content
-              : [event.message.content],
-            timestamp: new Date().toISOString(),
-            workingDirectory: currentWorkingDirectory,
-            parentToolUseId,
-          };
 
           if (parentToolUseId) {
             // This is a child message - add to childrenMessages instead
+            const assistantMessage: ChatMessage = {
+              id: event.message.id,
+              messageId: `assistant-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+              type: 'assistant',
+              content: Array.isArray(event.message.content)
+                ? event.message.content
+                : [event.message.content],
+              timestamp: new Date().toISOString(),
+              workingDirectory: currentWorkingDirectory,
+              parentToolUseId,
+            };
+
             setChildrenMessages((prev) => {
               const newChildren = { ...prev };
               if (!newChildren[parentToolUseId]) {
@@ -167,9 +177,88 @@ export function useConversationMessages(options: UseConversationMessagesOptions 
               return newChildren;
             });
           } else {
-            // Regular message - add to main list
-            addMessage(assistantMessage);
-            options.onAssistantMessage?.(assistantMessage);
+            // Regular message - check if this is a streaming update
+            setMessages((prev) => {
+              const existingIndex = prev.findIndex((m) => m.id === event.message.id);
+
+              if (existingIndex !== -1) {
+                // Streaming update: preserve messageId but update content
+                const updated = [...prev];
+                const newContent = Array.isArray(event.message.content)
+                  ? event.message.content
+                  : [event.message.content];
+
+                updated[existingIndex] = {
+                  ...updated[existingIndex],
+                  id: event.message.id,
+                  content: newContent,
+                  timestamp: new Date().toISOString(),
+                };
+
+                // Track tool uses in streaming updates
+                const toolUseIds: string[] = [];
+                if (Array.isArray(newContent)) {
+                  newContent.forEach((block) => {
+                    if (block.type === 'tool_use' && block.id) {
+                      toolUseIds.push(block.id);
+                    }
+                  });
+                }
+
+                if (toolUseIds.length > 0) {
+                  setToolResults((prevResults) => {
+                    const updates: Record<string, ToolResult> = {};
+                    toolUseIds.forEach((id) => {
+                      if (!prevResults[id]) {
+                        updates[id] = { status: 'pending' };
+                      }
+                    });
+                    return { ...prevResults, ...updates };
+                  });
+                }
+
+                return updated;
+              } else {
+                // New message
+                const newContent = Array.isArray(event.message.content)
+                  ? event.message.content
+                  : [event.message.content];
+
+                const assistantMessage: ChatMessage = {
+                  id: event.message.id,
+                  messageId: event.message.id, // Use message.id as messageId for consistency
+                  type: 'assistant',
+                  content: newContent,
+                  timestamp: new Date().toISOString(),
+                  workingDirectory: currentWorkingDirectory,
+                };
+
+                // Track tool uses in new messages
+                const toolUseIds: string[] = [];
+                if (Array.isArray(newContent)) {
+                  newContent.forEach((block) => {
+                    if (block.type === 'tool_use' && block.id) {
+                      toolUseIds.push(block.id);
+                    }
+                  });
+                }
+
+                if (toolUseIds.length > 0) {
+                  setToolResults((prevResults) => {
+                    const updates: Record<string, ToolResult> = {};
+                    toolUseIds.forEach((id) => {
+                      if (!prevResults[id]) {
+                        updates[id] = { status: 'pending' };
+                      }
+                    });
+                    return { ...prevResults, ...updates };
+                  });
+                }
+
+                options.onAssistantMessage?.(assistantMessage);
+                return [...prev, assistantMessage];
+              }
+            });
           }
           break;
         }
@@ -263,7 +352,9 @@ export function useConversationMessages(options: UseConversationMessagesOptions 
         });
       } else if (message.type === 'user' && Array.isArray(message.content)) {
         // Update with tool results from user messages
-        message.content.forEach((block) => {
+        // Type assertion: user message content is ContentBlockParam[]
+        const contentBlocks = message.content as ContentBlockParam[];
+        contentBlocks.forEach((block) => {
           if (block.type === 'tool_result' && 'tool_use_id' in block) {
             const toolUseId = block.tool_use_id;
 

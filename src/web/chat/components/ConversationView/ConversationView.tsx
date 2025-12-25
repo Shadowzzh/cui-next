@@ -350,7 +350,7 @@ export function ConversationView() {
             onStop={handleStop}
             onPermissionDecision={handlePermissionDecision}
             isLoading={isConnected || isPermissionDecisionLoading}
-            placeholder="Continue the conversation..."
+            placeholder="继续对话..."
             permissionRequest={currentPermissionRequest}
             showPermissionUI={true}
             showStopButton={true}
