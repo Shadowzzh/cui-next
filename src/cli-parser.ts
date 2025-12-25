@@ -86,7 +86,9 @@ export function parseArgs(argv: string[]): CLIConfig {
 
       default:
         logger.error(`Unknown argument: ${arg}`);
-        logger.info('Usage: cui-server [--port <number>] [--host <string>] [--token <string>] [--skip-auth-token]');
+        logger.info(
+          'Usage: cui-server [--port <number>] [--host <string>] [--token <string>] [--skip-auth-token]'
+        );
         logger.info('Environment variables: PORT, HOST, AUTH_TOKEN, SKIP_AUTH_TOKEN');
         process.exit(1);
     }

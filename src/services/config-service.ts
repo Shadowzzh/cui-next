@@ -62,7 +62,9 @@ export class ConfigService {
       this.startWatching();
     } catch (error) {
       this.logger.error('Failed to initialize configuration', error);
-      throw new Error(`Configuration initialization failed: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(
+        `Configuration initialization failed: ${error instanceof Error ? error.message : String(error)}`
+      );
     }
   }
 
@@ -99,22 +101,20 @@ export class ConfigService {
       // Create default config
       const config: CUIConfig = {
         machine_id: machineId,
-        ...DEFAULT_CONFIG
+        ...DEFAULT_CONFIG,
       };
 
       // Write config file
-      fs.writeFileSync(
-        this.configPath,
-        JSON.stringify(config, null, 2),
-        'utf-8'
-      );
+      fs.writeFileSync(this.configPath, JSON.stringify(config, null, 2), 'utf-8');
 
       this.logger.info('Default configuration created', {
         path: this.configPath,
-        machineId: config.machine_id
+        machineId: config.machine_id,
       });
     } catch (error) {
-      throw new Error(`Failed to create default config: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(
+        `Failed to create default config: ${error instanceof Error ? error.message : String(error)}`
+      );
     }
   }
 
@@ -146,12 +146,17 @@ export class ConfigService {
         machine_id: fileConfig.machine_id || (await generateMachineId()),
         // Deep-merge known nested sections to ensure defaults are filled without dropping user values
         server: { ...DEFAULT_CONFIG.server, ...(fileConfig.server || {}) },
-        interface: { ...DEFAULT_CONFIG.interface, ...(fileConfig.interface || {}) }
+        interface: { ...DEFAULT_CONFIG.interface, ...(fileConfig.interface || {}) },
       };
 
       // Determine if we added any defaults and need to persist back to disk
-      if (!fileConfig.server || JSON.stringify(merged.server) !== JSON.stringify(fileConfig.server)) updated = true;
-      if (!fileConfig.interface || JSON.stringify(merged.interface) !== JSON.stringify(fileConfig.interface)) updated = true;
+      if (!fileConfig.server || JSON.stringify(merged.server) !== JSON.stringify(fileConfig.server))
+        updated = true;
+      if (
+        !fileConfig.interface ||
+        JSON.stringify(merged.interface) !== JSON.stringify(fileConfig.interface)
+      )
+        updated = true;
       if (!fileConfig.machine_id) updated = true;
       // Auth token check removed
 
@@ -166,10 +171,11 @@ export class ConfigService {
       }
       this.logger.debug('Configuration loaded successfully');
     } catch (error) {
-      throw new Error(`Failed to load config: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(
+        `Failed to load config: ${error instanceof Error ? error.message : String(error)}`
+      );
     }
   }
-
 
   /**
    * Update configuration
@@ -194,7 +200,7 @@ export class ConfigService {
           notifications:
             updates.interface.notifications !== undefined
               ? { ...(current.interface.notifications || {}), ...updates.interface.notifications }
-              : current.interface.notifications
+              : current.interface.notifications,
         }
       : current.interface;
 
@@ -211,7 +217,7 @@ export class ConfigService {
       server: mergedServer,
       interface: mergedInterface,
       gemini: mergedGemini,
-      router: mergedRouter
+      router: mergedRouter,
     };
 
     // Update in-memory config
@@ -227,14 +233,22 @@ export class ConfigService {
       this.emitter.emit('config-changed', this.config, prev, 'internal');
     } catch (error) {
       this.logger.error('Failed to update configuration', error);
-      throw new Error(`Failed to update config: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(
+        `Failed to update config: ${error instanceof Error ? error.message : String(error)}`
+      );
     }
   }
 
   /**
    * Subscribe to configuration changes
    */
-  onChange(listener: (newConfig: CUIConfig, previous: CUIConfig | null, source: 'internal' | 'external') => void): void {
+  onChange(
+    listener: (
+      newConfig: CUIConfig,
+      previous: CUIConfig | null,
+      source: 'internal' | 'external'
+    ) => void
+  ): void {
     this.emitter.on('config-changed', listener);
   }
 
@@ -296,7 +310,10 @@ export class ConfigService {
   }
 
   private assertInterfaceConfig(iface: Partial<InterfaceConfig>): void {
-    if (iface.colorScheme !== undefined && !['light', 'dark', 'system'].includes(iface.colorScheme as string)) {
+    if (
+      iface.colorScheme !== undefined &&
+      !['light', 'dark', 'system'].includes(iface.colorScheme as string)
+    ) {
       throw new Error("Invalid config: interface.colorScheme must be 'light' | 'dark' | 'system'");
     }
     if (iface.language !== undefined && typeof iface.language !== 'string') {
@@ -322,23 +339,33 @@ export class ConfigService {
         throw new Error('Invalid config: router.providers must be an array');
       }
       for (const p of router.providers as RouterProvider[]) {
-        if (p.name !== undefined && typeof p.name !== 'string') throw new Error('Invalid config: router.providers[].name must be a string');
-        if (p.api_base_url !== undefined && typeof p.api_base_url !== 'string') throw new Error('Invalid config: router.providers[].api_base_url must be a string');
-        if (p.api_key !== undefined && typeof p.api_key !== 'string') throw new Error('Invalid config: router.providers[].api_key must be a string');
-        if (p.models !== undefined && !Array.isArray(p.models)) throw new Error('Invalid config: router.providers[].models must be an array of strings');
+        if (p.name !== undefined && typeof p.name !== 'string')
+          throw new Error('Invalid config: router.providers[].name must be a string');
+        if (p.api_base_url !== undefined && typeof p.api_base_url !== 'string')
+          throw new Error('Invalid config: router.providers[].api_base_url must be a string');
+        if (p.api_key !== undefined && typeof p.api_key !== 'string')
+          throw new Error('Invalid config: router.providers[].api_key must be a string');
+        if (p.models !== undefined && !Array.isArray(p.models))
+          throw new Error('Invalid config: router.providers[].models must be an array of strings');
         if (Array.isArray(p.models)) {
           for (const m of p.models) {
-            if (typeof m !== 'string') throw new Error('Invalid config: router.providers[].models must contain strings');
+            if (typeof m !== 'string')
+              throw new Error('Invalid config: router.providers[].models must contain strings');
           }
         }
       }
     }
     if (router.rules !== undefined) {
-      if (typeof router.rules !== 'object' || router.rules === null || Array.isArray(router.rules)) {
+      if (
+        typeof router.rules !== 'object' ||
+        router.rules === null ||
+        Array.isArray(router.rules)
+      ) {
         throw new Error('Invalid config: router.rules must be an object of string values');
       }
       for (const [k, v] of Object.entries(router.rules)) {
-        if (typeof v !== 'string') throw new Error(`Invalid config: router.rules['${k}'] must be a string`);
+        if (typeof v !== 'string')
+          throw new Error(`Invalid config: router.rules['${k}'] must be a string`);
       }
     }
   }
@@ -394,16 +421,23 @@ export class ConfigService {
       // Validate provided fields strictly
       this.validateProvidedFields(parsed);
       // Merge and validate complete
-      const current = this.config || ({ ...DEFAULT_CONFIG, machine_id: '' } as unknown as CUIConfig);
+      const current =
+        this.config || ({ ...DEFAULT_CONFIG, machine_id: '' } as unknown as CUIConfig);
       const merged: CUIConfig = {
         ...DEFAULT_CONFIG,
         ...current,
         ...parsed,
         server: { ...DEFAULT_CONFIG.server, ...(current.server || {}), ...(parsed.server || {}) },
-        interface: { ...DEFAULT_CONFIG.interface, ...(current.interface || {}), ...(parsed.interface || {}) },
-        router: parsed.router !== undefined ? (parsed.router as CUIConfig['router']) : current.router,
-        gemini: parsed.gemini !== undefined ? (parsed.gemini as CUIConfig['gemini']) : current.gemini,
-        machine_id: parsed.machine_id || current.machine_id
+        interface: {
+          ...DEFAULT_CONFIG.interface,
+          ...(current.interface || {}),
+          ...(parsed.interface || {}),
+        },
+        router:
+          parsed.router !== undefined ? (parsed.router as CUIConfig['router']) : current.router,
+        gemini:
+          parsed.gemini !== undefined ? (parsed.gemini as CUIConfig['gemini']) : current.gemini,
+        machine_id: parsed.machine_id || current.machine_id,
       };
       this.validateCompleteConfig(merged);
       const prev = this.config;

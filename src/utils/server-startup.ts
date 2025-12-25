@@ -16,5 +16,3 @@ export function displayServerStartup(options: ServerStartupOptions): void {
   logger.info(`🚀 Server listening on ${serverUrl}`);
   logger.info('🔓 Direct access - no authentication required');
 }
-
- 

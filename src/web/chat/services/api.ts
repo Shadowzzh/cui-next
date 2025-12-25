@@ -12,25 +12,29 @@ import type {
   FileSystemListResponse,
   CommandsResponse,
 } from '../types';
-type GeminiHealthResponse = { status: 'healthy' | 'unhealthy'; message: string; apiKeyValid: boolean };
+type GeminiHealthResponse = {
+  status: 'healthy' | 'unhealthy';
+  message: string;
+  apiKeyValid: boolean;
+};
 
 class ApiService {
   private baseUrl = '';
 
-  private async apiCall<T>(
-    url: string,
-    options?: RequestInit
-  ): Promise<T> {
+  private async apiCall<T>(url: string, options?: RequestInit): Promise<T> {
     const fullUrl = `${this.baseUrl}${url}`;
     const method = options?.method || 'GET';
-    
+
     // Log request
-    console.log(`[API] ${method} ${fullUrl}`, options?.body ? JSON.parse(options.body as string) : '');
-    
+    console.log(
+      `[API] ${method} ${fullUrl}`,
+      options?.body ? JSON.parse(options.body as string) : ''
+    );
+
     // Set up headers without authentication
     const headers = new Headers(options?.headers as HeadersInit);
     headers.set('Content-Type', 'application/json');
-    
+
     try {
       const response = await fetch(fullUrl, {
         ...options,
@@ -48,7 +52,9 @@ class ApiService {
         console.error(`[API Error] Response body preview:`, text.substring(0, 200));
 
         if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: Server returned ${contentType} instead of JSON`);
+          throw new Error(
+            `HTTP ${response.status}: Server returned ${contentType} instead of JSON`
+          );
         }
         throw new Error(`Expected JSON response but got ${contentType}`);
       }
@@ -81,7 +87,8 @@ class ApiService {
     if (params?.limit) searchParams.append('limit', params.limit.toString());
     if (params?.offset) searchParams.append('offset', params.offset.toString());
     if (params?.projectPath) searchParams.append('projectPath', params.projectPath);
-    if (params?.hasContinuation !== undefined) searchParams.append('hasContinuation', params.hasContinuation.toString());
+    if (params?.hasContinuation !== undefined)
+      searchParams.append('hasContinuation', params.hasContinuation.toString());
     if (params?.archived !== undefined) searchParams.append('archived', params.archived.toString());
     if (params?.pinned !== undefined) searchParams.append('pinned', params.pinned.toString());
     searchParams.append('sortBy', 'updated');
@@ -101,7 +108,6 @@ class ApiService {
     });
   }
 
-
   async stopConversation(streamingId: string): Promise<{ success: boolean }> {
     return this.apiCall(`/api/conversations/${streamingId}/stop`, {
       method: 'POST',
@@ -116,14 +122,14 @@ class ApiService {
     return this.apiCall('/api/working-directories');
   }
 
-  async getPermissions(params?: { 
-    streamingId?: string; 
-    status?: 'pending' | 'approved' | 'denied' 
+  async getPermissions(params?: {
+    streamingId?: string;
+    status?: 'pending' | 'approved' | 'denied';
   }): Promise<{ permissions: PermissionRequest[] }> {
     const searchParams = new URLSearchParams();
     if (params?.streamingId) searchParams.append('streamingId', params.streamingId);
     if (params?.status) searchParams.append('status', params.status);
-    
+
     return this.apiCall(`/api/permissions?${searchParams}`);
   }
 
@@ -156,9 +162,11 @@ class ApiService {
   async listDirectory(params: FileSystemListQuery): Promise<FileSystemListResponse> {
     const searchParams = new URLSearchParams();
     searchParams.append('path', params.path);
-    if (params.recursive !== undefined) searchParams.append('recursive', params.recursive.toString());
-    if (params.respectGitignore !== undefined) searchParams.append('respectGitignore', params.respectGitignore.toString());
-    
+    if (params.recursive !== undefined)
+      searchParams.append('recursive', params.recursive.toString());
+    if (params.respectGitignore !== undefined)
+      searchParams.append('respectGitignore', params.respectGitignore.toString());
+
     return this.apiCall(`/api/filesystem/list?${searchParams}`);
   }
 
@@ -167,7 +175,7 @@ class ApiService {
     if (workingDirectory) {
       searchParams.append('workingDirectory', workingDirectory);
     }
-    
+
     return this.apiCall(`/api/system/commands?${searchParams}`);
   }
 
@@ -191,7 +199,12 @@ class ApiService {
     return this.apiCall(`/api/filesystem/read?${searchParams}`);
   }
 
-  async archiveAllSessions(): Promise<{ success: boolean; archivedCount: number; message?: string; error?: string }> {
+  async archiveAllSessions(): Promise<{
+    success: boolean;
+    archivedCount: number;
+    message?: string;
+    error?: string;
+  }> {
     return this.apiCall('/api/conversations/archive-all', {
       method: 'POST',
     });
@@ -202,7 +215,7 @@ class ApiService {
       method: 'POST',
       body: JSON.stringify({
         audio: audioBase64,
-        mimeType: mimeType
+        mimeType: mimeType,
       }),
     });
   }
@@ -222,7 +235,12 @@ class ApiService {
     });
   }
 
-  async getWebPushStatus(): Promise<{ enabled: boolean; subscriptionCount: number; hasPublicKey: boolean; publicKey?: string }> {
+  async getWebPushStatus(): Promise<{
+    enabled: boolean;
+    subscriptionCount: number;
+    hasPublicKey: boolean;
+    publicKey?: string;
+  }> {
     return this.apiCall('/api/notifications/status');
   }
 
@@ -250,9 +268,9 @@ class ApiService {
   // For endpoints that need direct fetch (like SSE streams)
   async fetchWithAuth(url: string, options?: RequestInit): Promise<Response> {
     const headers: Record<string, string> = {
-      ...options?.headers as Record<string, string>,
+      ...(options?.headers as Record<string, string>),
     };
-    
+
     return fetch(url, {
       ...options,
       headers,

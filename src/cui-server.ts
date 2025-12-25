@@ -22,11 +22,7 @@ import { NotificationService } from './services/notification-service.js';
 import { WebPushService } from './services/web-push-service.js';
 import { geminiService } from './services/gemini-service.js';
 import { ClaudeRouterService } from './services/claude-router-service.js';
-import {
-  StreamEvent,
-  CUIError,
-  PermissionRequest
-} from './types/index.js';
+import { StreamEvent, CUIError, PermissionRequest } from './types/index.js';
 import { createLogger, type Logger } from './services/logger.js';
 import { createConversationRoutes } from './routes/conversation.routes.js';
 import { createSystemRoutes } from './routes/system.routes.js';
@@ -70,16 +66,28 @@ export class CUIServer {
   private logger: Logger;
   private port: number;
   private host: string;
-  private configOverrides?: { port?: number; host?: string; token?: string; skipAuthToken?: boolean };
+  private configOverrides?: {
+    port?: number;
+    host?: string;
+    token?: string;
+    skipAuthToken?: boolean;
+  };
 
-  constructor(configOverrides?: { port?: number; host?: string; token?: string; skipAuthToken?: boolean }) {
+  constructor(configOverrides?: {
+    port?: number;
+    host?: string;
+    token?: string;
+    skipAuthToken?: boolean;
+  }) {
     this.app = express();
     this.configOverrides = configOverrides;
 
     this.logger = createLogger('CUIServer');
 
     // TEST: Add debug log right at the start
-    this.logger.debug('🔍 TEST: CUIServer constructor started - this should be visible if debug logging works');
+    this.logger.debug(
+      '🔍 TEST: CUIServer constructor started - this should be visible if debug logging works'
+    );
 
     // Initialize config service first
     this.configService = ConfigService.getInstance();
@@ -90,7 +98,7 @@ export class CUIServer {
 
     this.logger.debug('Initializing CUIServer', {
       nodeEnv: process.env.NODE_ENV,
-      configOverrides
+      configOverrides,
     });
 
     // Initialize services
@@ -102,7 +110,15 @@ export class CUIServer {
     this.statusTracker = this.conversationStatusManager; // Use the same instance for backward compatibility
     this.toolMetricsService = new ToolMetricsService();
     this.fileSystemService = new FileSystemService();
-    this.processManager = new ClaudeProcessManager(this.historyReader, this.statusTracker, undefined, undefined, this.toolMetricsService, this.sessionInfoService, this.fileSystemService);
+    this.processManager = new ClaudeProcessManager(
+      this.historyReader,
+      this.statusTracker,
+      undefined,
+      undefined,
+      this.toolMetricsService,
+      this.sessionInfoService,
+      this.fileSystemService
+    );
     this.streamManager = new StreamManager();
     this.permissionTracker = new PermissionTracker();
     this.mcpConfigGenerator = new MCPConfigGenerator(this.fileSystemService);
@@ -177,7 +193,7 @@ export class CUIServer {
         machineId: config.machine_id,
         port: this.port,
         host: this.host,
-        overrides: this.configOverrides ? Object.keys(this.configOverrides) : []
+        overrides: this.configOverrides ? Object.keys(this.configOverrides) : [],
       });
 
       // Set up routes after services are initialized
@@ -194,13 +210,16 @@ export class CUIServer {
         const isTestEnv = process.env.NODE_ENV === 'test';
 
         if (isTestEnv) {
-          this.logger.warn('MCP config generation failed in test environment, proceeding without MCP', {
-            error: error instanceof Error ? error.message : String(error)
-          });
+          this.logger.warn(
+            'MCP config generation failed in test environment, proceeding without MCP',
+            {
+              error: error instanceof Error ? error.message : String(error),
+            }
+          );
           // Don't set MCP config path - conversations will run without MCP
         } else {
           this.logger.error('MCP config generation failed in production environment', {
-            error: error instanceof Error ? error.message : String(error)
+            error: error instanceof Error ? error.message : String(error),
           });
           throw new CUIError(
             'MCP_CONFIG_REQUIRED',
@@ -214,7 +233,7 @@ export class CUIServer {
       displayServerStartup({
         host: this.host,
         port: this.port,
-        logger: this.logger
+        logger: this.logger,
       });
 
       // Subscribe to configuration changes to hot-reload router when needed
@@ -228,7 +247,7 @@ export class CUIServer {
     } catch (error) {
       this.logger.error('Failed to initialize server:', error, {
         errorType: error instanceof Error ? error.constructor.name : typeof error,
-        errorMessage: error instanceof Error ? error.message : String(error)
+        errorMessage: error instanceof Error ? error.message : String(error),
       });
 
       if (error instanceof CUIError) {
@@ -252,7 +271,7 @@ export class CUIServer {
       const isDev = process.env.NODE_ENV === 'development';
       this.logger.debug('Creating HTTP server listener', {
         useViteExpress: isDev,
-        environment: process.env.NODE_ENV
+        environment: process.env.NODE_ENV,
       });
 
       // Import ViteExpress dynamically if in development mode
@@ -269,7 +288,7 @@ export class CUIServer {
               this.logger.debug('Server successfully bound to port (dev mode)', {
                 port: this.port,
                 host: this.host,
-                address: this.server?.address()
+                address: this.server?.address(),
               });
               resolve();
             });
@@ -277,7 +296,7 @@ export class CUIServer {
             // Configure ViteExpress for development
             ViteExpress.config({
               mode: 'development',
-              viteConfigFile: 'vite.config.mts'
+              viteConfigFile: 'vite.config.mts',
             });
 
             ViteExpress.bind(this.app, this.server);
@@ -293,7 +312,7 @@ export class CUIServer {
               port: this.port,
               host: this.host,
               address: this.server?.address(),
-              mode: process.env.NODE_ENV || 'production'
+              mode: process.env.NODE_ENV || 'production',
             });
             resolve();
           });
@@ -305,17 +324,22 @@ export class CUIServer {
               errorCode: (error as any).code,
               errorSyscall: (error as any).syscall,
               port: this.port,
-              host: this.host
+              host: this.host,
             });
-            reject(new CUIError('HTTP_SERVER_START_FAILED', `Failed to start HTTP server: ${error.message}`, 500));
+            reject(
+              new CUIError(
+                'HTTP_SERVER_START_FAILED',
+                `Failed to start HTTP server: ${error.message}`,
+                500
+              )
+            );
           });
         }
       });
-
     } catch (error) {
       this.logger.error('Failed to start server:', error, {
         errorType: error instanceof Error ? error.constructor.name : typeof error,
-        errorMessage: error instanceof Error ? error.message : String(error)
+        errorMessage: error instanceof Error ? error.message : String(error),
       });
 
       // Attempt cleanup on startup failure
@@ -336,7 +360,7 @@ export class CUIServer {
     this.logger.debug('Stop method called', {
       hasServer: !!this.server,
       activeSessions: this.processManager.getActiveSessions().length,
-      connectedClients: this.streamManager.getTotalClientCount()
+      connectedClients: this.streamManager.getTotalClientCount(),
     });
 
     if (this.routerService) {
@@ -358,16 +382,17 @@ export class CUIServer {
       this.logger.debug('Active sessions to stop', { sessionIds: activeSessions });
 
       const stopResults = await Promise.allSettled(
-        activeSessions.map(streamingId =>
-          this.processManager.stopConversation(streamingId)
-            .catch(error => this.logger.error(`Error stopping session ${streamingId}:`, error))
+        activeSessions.map((streamingId) =>
+          this.processManager
+            .stopConversation(streamingId)
+            .catch((error) => this.logger.error(`Error stopping session ${streamingId}:`, error))
         )
       );
 
       this.logger.debug('Session stop results', {
         total: stopResults.length,
-        fulfilled: stopResults.filter(r => r.status === 'fulfilled').length,
-        rejected: stopResults.filter(r => r.status === 'rejected').length
+        fulfilled: stopResults.filter((r) => r.status === 'fulfilled').length,
+        rejected: stopResults.filter((r) => r.status === 'rejected').length,
       });
     }
 
@@ -398,7 +423,7 @@ export class CUIServer {
     this.logger.info('Performing cleanup after startup failure...');
     this.logger.debug('Cleanup initiated', {
       hasServer: !!this.server,
-      hasActiveStreams: this.streamManager.getTotalClientCount() > 0
+      hasActiveStreams: this.streamManager.getTotalClientCount() > 0,
     });
 
     try {
@@ -418,7 +443,7 @@ export class CUIServer {
       this.logger.info('Cleanup completed');
     } catch (error) {
       this.logger.error('Error during cleanup:', error, {
-        errorType: error instanceof Error ? error.constructor.name : typeof error
+        errorType: error instanceof Error ? error.constructor.name : typeof error,
       });
     }
   }
@@ -444,7 +469,6 @@ export class CUIServer {
 
     // Query parameter parsing - convert strings to proper types
     this.app.use(queryParser);
-
   }
 
   private setupRoutes(): void {
@@ -458,21 +482,29 @@ export class CUIServer {
     this.app.use('/api/notifications', createNotificationsRoutes(this.webPushService));
 
     // Authentication is permanently disabled - direct API access without tokens
-    this.logger.info('Authentication is disabled - using environment ANTHROPIC_API_KEY for Claude access');
+    this.logger.info(
+      'Authentication is disabled - using environment ANTHROPIC_API_KEY for Claude access'
+    );
 
     // API routes
-    this.app.use('/api/conversations', createConversationRoutes(
-      this.processManager,
-      this.historyReader,
-      this.statusTracker,
-      this.sessionInfoService,
-      this.conversationStatusManager,
-      this.toolMetricsService
-    ));
+    this.app.use(
+      '/api/conversations',
+      createConversationRoutes(
+        this.processManager,
+        this.historyReader,
+        this.statusTracker,
+        this.sessionInfoService,
+        this.conversationStatusManager,
+        this.toolMetricsService
+      )
+    );
     this.app.use('/api/filesystem', createFileSystemRoutes(this.fileSystemService));
     this.app.use('/api/logs', createLogRoutes());
     this.app.use('/api/stream', createStreamingRoutes(this.streamManager));
-    this.app.use('/api/working-directories', createWorkingDirectoriesRoutes(this.workingDirectoriesService));
+    this.app.use(
+      '/api/working-directories',
+      createWorkingDirectoriesRoutes(this.workingDirectoriesService)
+    );
     this.app.use('/api/config', createConfigRoutes(this.configService));
     this.app.use('/api/gemini', createGeminiRoutes(geminiService));
 
@@ -504,14 +536,14 @@ export class CUIServer {
         messageSubtype: message?.subtype,
         hasContent: !!message?.content,
         contentLength: message?.content?.length || 0,
-        messageKeys: message ? Object.keys(message) : []
+        messageKeys: message ? Object.keys(message) : [],
       });
 
       // Skip broadcasting system init messages as they're now included in API response
       if (message && message.type === 'system' && message.subtype === 'init') {
         this.logger.debug('Skipping broadcast of system init message (included in API response)', {
           streamingId,
-          sessionId: message.session_id
+          sessionId: message.session_id,
         });
         return;
       }
@@ -520,7 +552,7 @@ export class CUIServer {
       this.logger.debug('Broadcasting message to StreamManager', {
         streamingId,
         messageType: message?.type,
-        messageSubtype: message?.subtype
+        messageSubtype: message?.subtype,
       });
       this.streamManager.broadcast(streamingId, message);
     });
@@ -531,7 +563,7 @@ export class CUIServer {
         streamingId,
         exitCode: code,
         clientCount: this.streamManager.getClientCount(streamingId),
-        wasSuccessful: code === 0
+        wasSuccessful: code === 0,
       });
 
       // Unregister session from status tracker
@@ -545,7 +577,7 @@ export class CUIServer {
       if (removedCount > 0) {
         this.logger.debug('Cleaned up permissions for closed session', {
           streamingId,
-          removedPermissions: removedCount
+          removedPermissions: removedCount,
         });
       }
 
@@ -562,7 +594,7 @@ export class CUIServer {
         streamingId,
         error,
         errorLength: error?.toString().length || 0,
-        clientCount: this.streamManager.getClientCount(streamingId)
+        clientCount: this.streamManager.getClientCount(streamingId),
       });
 
       // Unregister session from status tracker on error
@@ -575,25 +607,24 @@ export class CUIServer {
         type: 'error' as const,
         error: error.toString(),
         streamingId: streamingId,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
 
       this.logger.debug('Broadcasting error event to clients', {
         streamingId,
-        errorEventKeys: Object.keys(errorEvent)
+        errorEventKeys: Object.keys(errorEvent),
       });
 
       this.streamManager.broadcast(streamingId, errorEvent);
     });
 
     this.logger.debug('ProcessManager integration setup complete', {
-      totalEventListeners: this.processManager.listenerCount('claude-message') +
-                          this.processManager.listenerCount('process-closed') +
-                          this.processManager.listenerCount('process-error')
+      totalEventListeners:
+        this.processManager.listenerCount('claude-message') +
+        this.processManager.listenerCount('process-closed') +
+        this.processManager.listenerCount('process-error'),
     });
   }
-
-
 
   private setupPermissionTrackerIntegration(): void {
     this.logger.debug('Setting up PermissionTracker integration');
@@ -603,7 +634,7 @@ export class CUIServer {
       this.logger.debug('Permission request event received', {
         id: request.id,
         toolName: request.toolName,
-        streamingId: request.streamingId
+        streamingId: request.streamingId,
       });
 
       // Broadcast to the appropriate streaming session
@@ -612,7 +643,7 @@ export class CUIServer {
           type: 'permission_request',
           data: request,
           streamingId: request.streamingId,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         };
 
         this.streamManager.broadcast(request.streamingId, event);
@@ -624,7 +655,9 @@ export class CUIServer {
     this.logger.debug('PermissionTracker integration setup complete');
   }
 
-  private async initializeOrReloadRouter(config: import('./types/config.js').CUIConfig): Promise<void> {
+  private async initializeOrReloadRouter(
+    config: import('./types/config.js').CUIConfig
+  ): Promise<void> {
     // If router is disabled, ensure it is stopped
     if (!config.router?.enabled) {
       if (this.routerService) {

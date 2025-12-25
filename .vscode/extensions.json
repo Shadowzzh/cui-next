@@ -1,0 +1,19 @@
+{
+  "recommendations": [
+    // 必需扩展
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+
+    // TypeScript 相关
+    "ms-vscode.vscode-typescript-next",
+
+    // Tailwind CSS 智能提示
+    "bradlc.vscode-tailwindcss",
+
+  ],
+  "unwantedRecommendations": [
+    // 避免与 Prettier 冲突的格式化器
+    "HookyQR.beautify",
+    "esbenp.beautify"
+  ]
+}

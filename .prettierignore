@@ -1,0 +1,73 @@
+# Dependencies
+node_modules
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+
+# Build outputs
+dist
+build
+out
+.next
+.nuxt
+.cache
+.vite
+.turbo
+
+# Coverage
+coverage
+.nyc_output
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Test artifacts
+.vitest
+.test-results
+
+# Generated files
+*.min.js
+*.min.css
+
+# MCP config (auto-generated)
+.cui/mcp-config-*.json
+
+# Session database
+.cui/session-info.db
+
+# Git
+.git
+.gitignore
+
+# Documentation examples (preserve formatting)
+docs/examples
+.claude/commands
+.claude/skills
+
+# Pentest artifacts (preserve formatting)
+.pentest-state.json
+.pentest-config.json
+.pentest-testcases
+
+# Public assets
+public
+static

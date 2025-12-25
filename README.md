@@ -31,18 +31,20 @@
 
 1. 使用 Node.js >= 20.19.0 启动服务器:
 
-    ```bash
-    npx cui-server
-    ```
-    或全局安装:
-    ```bash
-    npm install -g cui-server
-    ```
+   ```bash
+   npx cui-server
+   ```
+
+   或全局安装:
+
+   ```bash
+   npm install -g cui-server
+   ```
 
 2. 在浏览器中打开 http://localhost:3001/#your-token (token 将在 cui-server 命令输出中显示)。
 3. 选择模型提供商:
-    - 如果你已登录 Claude Code 或环境中有有效的 Anthropic API key,cui 可直接使用。
-    - 或者前往 `设置 -> 提供商` 选择模型提供商。cui 使用 [claude-code-router](https://github.com/musistudio/claude-code-router) 配置,支持从 OpenRouter 到 Ollama 的各种模型提供商。
+   - 如果你已登录 Claude Code 或环境中有有效的 Anthropic API key,cui 可直接使用。
+   - 或者前往 `设置 -> 提供商` 选择模型提供商。cui 使用 [claude-code-router](https://github.com/musistudio/claude-code-router) 配置,支持从 OpenRouter 到 Ollama 的各种模型提供商。
 4. (可选) 配置通知和语音输入设置。
 
 ## 使用指南

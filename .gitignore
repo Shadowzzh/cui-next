@@ -16,7 +16,12 @@ public/node_modules/
 .env.*.local
 
 # IDE and editor files
-.vscode/
+# Keep shared VSCode settings but ignore user-specific configs
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/tasks.json
+!.vscode/launch.json
 .idea/
 *.swp
 *.swo
