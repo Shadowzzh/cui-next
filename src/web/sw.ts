@@ -1,7 +1,6 @@
 /// <reference lib="webworker" />
 // Basic service worker to handle push notifications and precache
 
-/* eslint-env serviceworker */
 /* global ServiceWorkerGlobalScope, ExtendableEvent, PushEvent, NotificationEvent, WindowClient */
 
 import { precacheAndRoute } from 'workbox-precaching';
@@ -35,8 +34,8 @@ self.addEventListener('push', (event: PushEvent) => {
       body,
       tag,
       data: payloadData,
-      icon: '/icon-192x192.png',
-      badge: '/icon-192x192.png',
+      icon: '/favicon.ico',
+      badge: '/favicon.ico',
     };
     event.waitUntil(self.registration.showNotification(title, options));
   } catch (_err) {
