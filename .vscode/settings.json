@@ -3,6 +3,7 @@
   "typescript.tsdk": "node_modules/typescript/lib",
   "typescript.enablePromptUseWorkspaceTsdk": true,
   "typescript.preferences.includePackageJsonAutoImports": "on",
+  "typescript.preferences.autoImportFileExcludePatterns": ["**/node_modules/*"],
 
   // ESLint
   "eslint.workingDirectories": [
