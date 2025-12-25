@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { MessageList } from '../MessageList/MessageList';
 import { Composer, ComposerRef } from '@/web/chat/components/Composer';
@@ -32,7 +32,6 @@ export function ConversationView() {
     currentPermissionRequest,
     childrenMessages,
     expandedTasks,
-    clearMessages,
     addMessage,
     setAllMessages,
     handleStreamMessage,
@@ -176,6 +175,18 @@ export function ConversationView() {
 
     setError(null);
 
+    // Optimistic update: immediately add user message to UI
+    // This ensures the user message is displayed even when backend doesn't push it via SSE
+    const userMessage: ChatMessage = {
+      id: '', // Will be populated from backend if/when it arrives
+      messageId: `user-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
+      type: 'user',
+      content: message,
+      timestamp: new Date().toISOString(),
+      workingDirectory: workingDirectory || currentWorkingDirectory,
+    };
+    addMessage(userMessage);
+
     try {
       const response = await api.startConversation({
         resumedSessionId: sessionId,
@@ -247,7 +258,7 @@ export function ConversationView() {
         subtitle={
           conversationSummary
             ? {
-                date: new Date(conversationSummary.createdAt).toLocaleDateString('en-US', {
+                date: new Date(conversationSummary.createdAt).toLocaleDateString('zh-CN', {
                   month: 'short',
                   day: 'numeric',
                 }),
@@ -344,7 +355,7 @@ export function ConversationView() {
             showPermissionUI={true}
             showStopButton={true}
             enableFileAutocomplete={true}
-            dropdownPosition="above"
+            // dropdownPosition="above"
             workingDirectory={conversationSummary?.projectPath}
             onFetchFileSystem={async (directory) => {
               try {
@@ -385,7 +396,7 @@ function convertToChatlMessages(details: ConversationDetailsResponse): ChatMessa
     .filter((msg) => !msg.isSidechain) // Filter out sidechain messages
     .map((msg) => {
       // Extract content from the message structure
-      let content = msg.message;
+      let content: any = msg.message;
 
       // Handle Anthropic message format
       if (typeof msg.message === 'object' && 'content' in msg.message) {
@@ -400,5 +411,5 @@ function convertToChatlMessages(details: ConversationDetailsResponse): ChatMessa
         timestamp: msg.timestamp,
         workingDirectory: msg.cwd, // Add working directory from backend message
       };
-    });
+    }) as unknown as ChatMessage[];
 }

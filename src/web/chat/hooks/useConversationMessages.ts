@@ -1,9 +1,6 @@
 import { useState, useCallback } from 'react';
 import type { ChatMessage, StreamEvent, ToolResult } from '../types';
-import type {
-  ContentBlock,
-  ContentBlockParam,
-} from '@anthropic-ai/sdk/resources/messages/messages';
+import type { ContentBlockParam } from '@anthropic-ai/sdk/resources/messages/messages';
 import type { PermissionRequest } from '@/types';
 
 interface UseConversationMessagesOptions {
@@ -30,7 +27,7 @@ export function useConversationMessages(options: UseConversationMessagesOptions 
 
   // Clear messages
   const clearMessages = useCallback(() => {
-    setMessages((prev) => {
+    setMessages(() => {
       return [];
     });
     setToolResults({});
@@ -140,9 +137,11 @@ export function useConversationMessages(options: UseConversationMessagesOptions 
               return newChildren;
             });
           }
+          // Note: Regular user messages are handled via optimistic update in ConversationView
+          // when sending a message, so we don't need to handle them here from SSE events
           break;
 
-        case 'assistant':
+        case 'assistant': {
           // Check if this is a child message
           const parentToolUseId = event.parent_tool_use_id;
           const assistantMessage: ChatMessage = {
@@ -173,6 +172,7 @@ export function useConversationMessages(options: UseConversationMessagesOptions 
             options.onAssistantMessage?.(assistantMessage);
           }
           break;
+        }
 
         case 'result':
           // Only update conversation status, don't update messages
@@ -181,7 +181,7 @@ export function useConversationMessages(options: UseConversationMessagesOptions 
           }
           break;
 
-        case 'error':
+        case 'error': {
           // Add as a new error message
           const errorId = `error-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
           const errorMessage: ChatMessage = {
@@ -195,6 +195,7 @@ export function useConversationMessages(options: UseConversationMessagesOptions 
           addMessage(errorMessage);
           options.onError?.(event.error);
           break;
+        }
 
         case 'closed':
           // Stream closed
@@ -232,7 +233,7 @@ export function useConversationMessages(options: UseConversationMessagesOptions 
       }
     });
 
-    setMessages((prev) => {
+    setMessages(() => {
       return parentMessages;
     });
 

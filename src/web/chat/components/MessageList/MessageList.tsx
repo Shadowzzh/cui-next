@@ -47,6 +47,7 @@ export const MessageList: React.FC<MessageListProps> = ({
     type: 'user' | 'assistant' | 'error' | 'system';
     messages: ChatMessage[];
   }> = [];
+
   displayMessages.forEach((message) => {
     const lastGroup = messageGroups[messageGroups.length - 1];
     if (lastGroup && lastGroup.type === message.type) {

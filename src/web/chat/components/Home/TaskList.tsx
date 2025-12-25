@@ -256,7 +256,7 @@ export function TaskList({
       {/* End of list message */}
       {!hasMore && conversations.length > 0 && (
         <div className="flex items-center justify-center w-full p-4 text-muted-foreground/70 text-xs text-center">
-          No more tasks to load
+          没有更多任务可加载
         </div>
       )}
     </div>
