@@ -115,7 +115,7 @@ export function TaskItem({
         }}
         href={`/c/${_id}`}
       >
-        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-5 w-full px-4 py-3.5 border-b border-border/30 text-sm">
+        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-5 w-full pl-2 pr-4 py-3.5 border-b border-border/30 text-sm">
           <div className="flex flex-col gap-0.5">
             <div className="flex items-center gap-1.5 w-full min-w-0 text-foreground">
               {isRenaming ? (

@@ -142,7 +142,7 @@ function DirectoryDropdown({
       }}
       isOpen={isOpen}
       onOpenChange={setIsOpen}
-      placeholder="Enter a directory..."
+      placeholder="输入目录..."
       showFilterInput={true}
       filterPredicate={(option, searchText) => {
         // Allow filtering by path
@@ -160,7 +160,7 @@ function DirectoryDropdown({
           size="sm"
           className="h-8 px-2 text-muted-foreground hover:bg-muted/50 rounded-full"
           onClick={onClick}
-          aria-label="View all code environments"
+          aria-label="查看所有代码环境"
         >
           <span className="flex items-center gap-1.5">
             <Laptop size={14} />
@@ -234,7 +234,7 @@ function ModelDropdown({ selectedModel, availableModels, onModelSelect }: ModelD
           size="sm"
           className="h-8 px-2 text-muted-foreground hover:bg-muted/50 rounded-full"
           onClick={onClick}
-          aria-label="Select AI model"
+          aria-label="选择 AI 模型"
         >
           <span className="flex items-center gap-1.5">
             {getModelIcon(selectedModel)}
@@ -331,7 +331,7 @@ export const Composer = forwardRef<ComposerRef, ComposerProps>(function Composer
     value: controlledValue,
     onChange: onControlledChange,
     onSubmit,
-    placeholder = 'Type a message...',
+    placeholder = '输入消息...',
     isLoading = false,
     disabled = false,
     showDirectorySelector = false,
@@ -622,15 +622,15 @@ export const Composer = forwardRef<ComposerRef, ComposerProps>(function Composer
   const getPermissionModeTitle = (mode: string): string => {
     switch (mode) {
       case 'default':
-        return 'Ask - Ask for permissions as needed';
+        return 'Ask - 根据需要请求权限';
       case 'acceptEdits':
-        return 'Auto - Allow Claude to make changes directly';
+        return 'Auto - 允许 Claude 直接进行更改';
       case 'bypassPermissions':
-        return 'Yolo - Skip all permission prompts';
+        return 'Yolo - 跳过所有权限提示';
       case 'plan':
-        return 'Plan - Create a plan without executing';
+        return 'Plan - 创建计划但不执行';
       default:
-        return 'Ask - Ask for permissions as needed';
+        return 'Ask - 根据需要请求权限';
     }
   };
 
@@ -823,12 +823,12 @@ export const Composer = forwardRef<ComposerRef, ComposerProps>(function Composer
           setTimeout(() => textareaRef.current?.focus(), 0);
           break;
       }
-    } else if (e.key === 'Enter') {
-      if (e.metaKey || e.ctrlKey) {
-        e.preventDefault();
-        handleSubmit(selectedPermissionMode);
-      }
+    } else if (e.key === 'Enter' && !e.shiftKey) {
+      // Enter without Shift sends the message
+      e.preventDefault();
+      handleSubmit(selectedPermissionMode);
     }
+    // Shift + Enter allows newlines (default textarea behavior)
   };
 
   const adjustTextareaHeight = () => {
@@ -938,8 +938,8 @@ export const Composer = forwardRef<ComposerRef, ComposerProps>(function Composer
         handleSubmit(selectedPermissionMode);
       }}
     >
-      <div className="flex flex-col items-center justify-center w-full bg-transparent border border-border rounded-3xl shadow-sm cursor-text transition-all duration-300">
-        <div className="relative flex items-end w-full min-h-[73px]">
+      <div className="flex flex-col items-center justify-center w-full bg-neutral-200  p-1 border-border rounded-2xl cursor-text transition-all duration-300">
+        <div className="relative flex items-end w-full min-h-[73px] bg-neutral-50 rounded-xl ">
           <div className="relative flex flex-1 items-start mx-5 min-h-[73px]">
             {audioState === 'recording' || audioState === 'processing' ? (
               <div className="w-full min-h-[80px] pb-[34px] bg-transparent overflow-hidden flex items-center justify-start">
@@ -954,9 +954,7 @@ export const Composer = forwardRef<ComposerRef, ComposerProps>(function Composer
                 ref={textareaRef}
                 className="min-h-[80px] max-h-[80vh] pt-4 pr-[60px] pb-[50px] border-none bg-transparent text-foreground font-sans text-base leading-relaxed resize-none outline-none overflow-y-auto scrollbar-thin ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
                 placeholder={
-                  permissionRequest && showPermissionUI
-                    ? 'Deny and tell Claude what to do'
-                    : placeholder
+                  permissionRequest && showPermissionUI ? '拒绝并告诉 Claude 该做什么' : placeholder
                 }
                 value={value}
                 onChange={handleTextChange}
@@ -1029,7 +1027,7 @@ export const Composer = forwardRef<ComposerRef, ComposerProps>(function Composer
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p>{audioState === 'processing' ? 'Processing...' : 'Accept recording'}</p>
+                      <p>{audioState === 'processing' ? '处理中...' : '接受录音'}</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
@@ -1048,7 +1046,7 @@ export const Composer = forwardRef<ComposerRef, ComposerProps>(function Composer
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p>Discard recording</p>
+                      <p>丢弃录音</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
@@ -1075,7 +1073,7 @@ export const Composer = forwardRef<ComposerRef, ComposerProps>(function Composer
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p>{audioError ? `Error: ${audioError}` : 'Start voice recording'}</p>
+                      <p>{audioError ? `错误: ${audioError}` : '开始语音录制'}</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
@@ -1090,7 +1088,7 @@ export const Composer = forwardRef<ComposerRef, ComposerProps>(function Composer
                   onClick={() => onPermissionDecision?.(permissionRequest.id, 'approve')}
                 >
                   <Check size={14} />
-                  <span>Accept</span>
+                  <span>接受</span>
                 </Button>
                 <Button
                   type="button"
@@ -1102,7 +1100,7 @@ export const Composer = forwardRef<ComposerRef, ComposerProps>(function Composer
                   }}
                 >
                   <X size={14} />
-                  <span>Deny</span>
+                  <span>拒绝</span>
                 </Button>
               </div>
             ) : isLoading && showStopButton ? (
@@ -1112,14 +1110,14 @@ export const Composer = forwardRef<ComposerRef, ComposerProps>(function Composer
                     <Button
                       type="button"
                       size="icon"
-                      className="w-8 h-8 hover:scale-[1.03] rounded-full"
+                      className="cursor-pointer w-8 h-8 hover:scale-[1.03] rounded-full"
                       onClick={() => onStop?.()}
                     >
-                      <Square size={18} />
+                      <Square size={16} />
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>Stop generation</p>
+                    <p>停止生成</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
@@ -1128,13 +1126,13 @@ export const Composer = forwardRef<ComposerRef, ComposerProps>(function Composer
                 <div className="flex items-center gap-2">
                   {/* Combined Permission Mode Button with Dropdown */}
                   <div
-                    className={`flex items-center rounded-full overflow-hidden ${
+                    className={`flex items-center rounded-md overflow-hidden ${
                       !value.trim() ||
                       isLoading ||
                       disabled ||
                       (showDirectorySelector && selectedDirectory === 'Select directory')
                         ? 'bg-foreground/5 text-foreground/50'
-                        : 'bg-foreground text-background'
+                        : 'bg-foreground/80 text-background'
                     }`}
                   >
                     <TooltipProvider>
@@ -1142,7 +1140,7 @@ export const Composer = forwardRef<ComposerRef, ComposerProps>(function Composer
                         <TooltipTrigger asChild>
                           <Button
                             type="button"
-                            className="h-8 min-w-[48px] w-[48px] px-3 py-0.5 bg-transparent text-inherit hover:bg-white/10 border-0 shadow-none"
+                            className="cursor-pointer flex items-center h-7 px-3 py-0.5 bg-transparent text-inherit hover:bg-white/10 border-0 shadow-none"
                             disabled={
                               !value.trim() ||
                               isLoading ||
@@ -1168,19 +1166,19 @@ export const Composer = forwardRef<ComposerRef, ComposerProps>(function Composer
                         {
                           value: 'default',
                           label: 'Ask',
-                          description: 'Ask before making changes',
+                          description: '更改前询问',
                         },
                         {
                           value: 'acceptEdits',
                           label: 'Auto',
-                          description: 'Apply edits automatically',
+                          description: '自动应用编辑',
                         },
                         {
                           value: 'bypassPermissions',
                           label: 'Yolo',
-                          description: 'No permission prompts',
+                          description: '跳过所有权限提示',
                         },
-                        { value: 'plan', label: 'Plan', description: 'Planning mode only' },
+                        { value: 'plan', label: 'Plan', description: '仅计划模式' },
                       ]}
                       value={selectedPermissionMode}
                       onChange={setSelectedPermissionMode}
@@ -1211,7 +1209,7 @@ export const Composer = forwardRef<ComposerRef, ComposerProps>(function Composer
                             disabled ||
                             (showDirectorySelector && selectedDirectory === 'Select directory')
                           }
-                          aria-label="Select permission mode"
+                          aria-label="选择权限模式"
                         >
                           <ChevronDown size={14} />
                         </Button>

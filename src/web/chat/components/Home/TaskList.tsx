@@ -189,10 +189,10 @@ export function TaskList({
       <div className="flex flex-col w-full flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-transparent hover:scrollbar-thumb-border scrollbar-track-transparent">
         <div className="flex items-center justify-center w-full py-12 px-4 text-muted-foreground text-sm text-center bg-background">
           {activeTab === 'tasks'
-            ? 'No active tasks.'
+            ? '没有当前任务。'
             : activeTab === 'history'
-              ? 'No history tasks.'
-              : 'No archived tasks.'}
+              ? '没有历史记录。'
+              : '没有已归档的任务。'}
         </div>
       </div>
     );
@@ -201,7 +201,7 @@ export function TaskList({
   return (
     <div
       ref={scrollRef}
-      className="flex flex-col w-full flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-transparent hover:scrollbar-thumb-border scrollbar-track-transparent"
+      className="flex flex-col w-full flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-transparent hover:scrollbar-thumb-border scrollbar-track-transparent pr-2"
     >
       {sortedConversations.map((conversation) => (
         <div key={conversation.sessionId} data-session-id={conversation.sessionId}>

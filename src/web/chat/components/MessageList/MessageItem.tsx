@@ -141,7 +141,7 @@ export function MessageItem({
 
     return (
       <div className="flex justify-end w-full my-1">
-        <div className="relative bg-card text-card-foreground border border-border rounded-xl p-3 max-w-[80%] min-w-[100px]">
+        <div className="relative text-card-foreground border-2 border-border/70 rounded-xl p-3 max-w-[80%] min-w-[100px]">
           {shouldShowExpandButton && (
             <button
               onClick={() => setIsUserMessageExpanded(!isUserMessageExpanded)}
@@ -187,9 +187,9 @@ export function MessageItem({
 
           if (block.type === 'text') {
             return (
-              <div key={blockId} className="flex gap-2 items-start">
+              <div key={blockId} className="flex gap-3 items-start">
                 <div className="w-4 h-5 flex-shrink-0 flex items-center justify-center text-foreground relative">
-                  <div className="mt-1 w-2.5 h-2.5 bg-foreground rounded-full" />
+                  <div className="w-2.5 h-2.5 bg-foreground rounded-full" />
                 </div>
                 <div className="flex-1 min-w-0 prose prose-sm max-w-none dark:prose-invert">
                   <ReactMarkdown components={markdownComponents}>{block.text}</ReactMarkdown>
@@ -200,9 +200,9 @@ export function MessageItem({
 
           if (block.type === 'thinking') {
             return (
-              <div key={blockId} className="flex gap-2 items-start">
+              <div key={blockId} className="flex gap-3 items-start">
                 <div className="w-4 h-5 flex-shrink-0 flex items-center justify-center text-foreground relative">
-                  <div className="mt-1 w-2.5 h-2.5 bg-foreground rounded-full" />
+                  <div className="w-2.5 h-2.5 bg-foreground rounded-full" />
                 </div>
                 <div className="flex-1 min-w-0 prose prose-sm max-w-none italic text-muted-foreground dark:prose-invert">
                   <ReactMarkdown components={markdownComponents}>{block.thinking}</ReactMarkdown>
@@ -217,7 +217,7 @@ export function MessageItem({
             const shouldBlink = isLoading && isStreaming;
 
             return (
-              <div key={blockId} className="flex gap-2 items-start">
+              <div key={blockId} className="flex gap-3 items-start">
                 <div
                   className={`w-4 h-5 flex-shrink-0 flex items-center justify-center text-foreground relative ${shouldBlink ? 'animate-pulse' : ''}`}
                 >

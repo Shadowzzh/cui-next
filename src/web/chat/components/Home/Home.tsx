@@ -134,7 +134,7 @@ export function Home() {
             <div className="sticky top-0 z-50 flex flex-col items-center bg-background">
               <div className="flex items-center gap-3 mb-4 pt-4">
                 <h1 className="text-2xl font-semibold font-sans text-foreground mb-10">
-                  下一个任务是什么？
+                  随时准备就绪。
                 </h1>
               </div>
 
