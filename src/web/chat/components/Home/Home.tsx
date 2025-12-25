@@ -57,13 +57,11 @@ export function Home() {
     }, 100);
 
     return () => clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Empty dependency array means this runs only on mount
 
   // Reload conversations when tab changes
   useEffect(() => {
     loadConversations(undefined, getFiltersForTab(activeTab));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab]);
 
   // Auto-refresh on focus
@@ -126,7 +124,8 @@ export function Home() {
 
   return (
     <div className="flex flex-col h-screen w-full bg-background">
-      <Header />
+      {/* <Header /> */}
+      <div className="mt-14" />
 
       <main className="relative flex flex-1 w-full h-full overflow-hidden transition-all duration-[250ms] z-[1]">
         <div className="flex flex-col h-full w-full">
