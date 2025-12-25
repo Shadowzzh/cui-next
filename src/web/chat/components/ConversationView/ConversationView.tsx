@@ -168,7 +168,8 @@ export function ConversationView() {
         model,
         permissionMode
       });
-
+    // Set streaming ID to establish SSE connection
+      setStreamingId(response.streamingId);
       // Navigate immediately to the new session
       navigate(`/c/${response.sessionId}`);
     } catch (err: any) {
