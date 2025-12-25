@@ -1,11 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { api } from '../services/api';
 import { useStreamStatus } from './StreamStatusContext';
-import type {
-  ConversationSummary,
-  WorkingDirectory,
-  ConversationSummaryWithLiveStatus,
-} from '../types';
+import type { ConversationSummary, ConversationSummaryWithLiveStatus } from '../types';
 
 interface RecentDirectory {
   lastDate: string;
@@ -33,8 +29,8 @@ interface ConversationsContextType {
 
 const ConversationsContext = createContext<ConversationsContextType | undefined>(undefined);
 
-const INITIAL_LIMIT = 20;
-const LOAD_MORE_LIMIT = 40;
+const INITIAL_LIMIT = 20; // 初始加载数量
+const LOAD_MORE_LIMIT = 40; // 每次加载更多的数量
 
 export function ConversationsProvider({ children }: { children: ReactNode }) {
   const [conversations, setConversations] = useState<ConversationSummaryWithLiveStatus[]>([]);
@@ -42,6 +38,7 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  /** 最近使用的工作目录 */
   const [recentDirectories, setRecentDirectories] = useState<Record<string, RecentDirectory>>({});
   const { subscribeToStreams, getStreamStatus, streamStatuses } = useStreamStatus();
 
@@ -97,11 +94,15 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
     setRecentDirectories(newDirectories);
   };
 
+  /** 加载会话 */
   const loadConversations = async (
     limit?: number,
     filters?: {
+      /** 是否有续集 */
       hasContinuation?: boolean;
+      /** 是否归档 */
       archived?: boolean;
+      /** 是否置顶 */
       pinned?: boolean;
     }
   ) => {

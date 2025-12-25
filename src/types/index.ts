@@ -114,7 +114,7 @@ export interface ConversationConfig {
 
 // API request/response types
 export interface StartConversationRequest {
-  workingDirectory: string;
+  workingDirectory?: string;
   initialPrompt: string;
   model?: string;
   allowedTools?: string[];

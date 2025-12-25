@@ -77,6 +77,8 @@ class ApiService {
 
   async getConversations(params?: {
     limit?: number;
+    sortBy?: 'updated';
+    order?: 'asc' | 'desc';
     offset?: number;
     projectPath?: string;
     hasContinuation?: boolean;

@@ -2,10 +2,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useConversations } from '../../contexts/ConversationsContext';
 import { api } from '../../services/api';
-import { Header } from './Header';
-import { Composer, ComposerRef } from '@/web/chat/components/Composer';
+import { Composer, ComposerProps, ComposerRef } from '@/web/chat/components/Composer';
 import { TaskTabs } from './TaskTabs';
 import { TaskList } from './TaskList';
+import { FileSystemEntry } from '@/types';
 
 export function Home() {
   const navigate = useNavigate();
@@ -94,11 +94,11 @@ export function Home() {
   const recentWorkingDirectory =
     conversations.length > 0 ? conversations[0].projectPath : undefined;
 
-  const handleComposerSubmit = async (
-    text: string,
-    workingDirectory: string,
-    model: string,
-    permissionMode: string
+  const handleComposerSubmit: ComposerProps['onSubmit'] = async (
+    text,
+    workingDirectory,
+    model,
+    permissionMode
   ) => {
     setIsSubmitting(true);
 
@@ -115,6 +115,7 @@ export function Home() {
     } catch (error) {
       console.error('Failed to start conversation:', error);
       // You might want to show an error message to the user here
+      // eslint-disable-next-line no-undef
       alert(
         `Failed to start conversation: ${error instanceof Error ? error.message : 'Unknown error'}`
       );
@@ -132,8 +133,8 @@ export function Home() {
           <div className="z-0 mx-auto flex flex-col w-full max-w-3xl h-full">
             <div className="sticky top-0 z-50 flex flex-col items-center bg-background">
               <div className="flex items-center gap-3 mb-4 pt-4">
-                <h1 className="text-2xl font-semibold font-sans text-foreground">
-                  What is the next task?
+                <h1 className="text-2xl font-semibold font-sans text-foreground mb-10">
+                  下一个任务是什么？
                 </h1>
               </div>
 
@@ -143,19 +144,19 @@ export function Home() {
                   workingDirectory={recentWorkingDirectory}
                   onSubmit={handleComposerSubmit}
                   isLoading={isSubmitting}
-                  placeholder="Describe your task"
+                  placeholder="描述你的任务..."
                   showDirectorySelector={true}
                   showModelSelector={true}
                   enableFileAutocomplete={true}
                   recentDirectories={recentDirectories}
                   getMostRecentWorkingDirectory={getMostRecentWorkingDirectory}
-                  onDirectoryChange={(directory) => {
+                  onDirectoryChange={() => {
                     // Focus input after directory change
                     setTimeout(() => {
                       composerRef.current?.focusInput();
                     }, 50);
                   }}
-                  onModelChange={(model) => {
+                  onModelChange={() => {
                     // Focus input after model change
                     setTimeout(() => {
                       composerRef.current?.focusInput();
@@ -167,7 +168,7 @@ export function Home() {
                       recursive: true,
                       respectGitignore: true,
                     });
-                    return response.entries;
+                    return response.entries as FileSystemEntry[];
                   }}
                   onFetchCommands={async (workingDirectory) => {
                     const response = await api.getCommands(workingDirectory);
@@ -186,7 +187,7 @@ export function Home() {
               hasMore={hasMore}
               error={error}
               activeTab={activeTab}
-              onLoadMore={(filters) => loadMoreConversations(filters)}
+              onLoadMore={() => loadMoreConversations()}
             />
           </div>
         </div>

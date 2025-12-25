@@ -20,21 +20,21 @@ export function TaskTabs({ activeTab, onTabChange }: TaskTabsProps) {
             className="data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-foreground border-0 rounded-none pb-3 pt-2 px-2 text-muted-foreground hover:text-muted-foreground/80 transition-colors"
             aria-label="Tab selector to view all tasks"
           >
-            Tasks
+            当前任务
           </TabsTrigger>
           <TabsTrigger
             value="history"
             className="data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-foreground border-0 rounded-none pb-3 pt-2 px-2 text-muted-foreground hover:text-muted-foreground/80 transition-colors"
             aria-label="Tab selector to view history"
           >
-            History
+            历史记录
           </TabsTrigger>
           <TabsTrigger
             value="archive"
             className="data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-foreground border-0 rounded-none pb-3 pt-2 px-2 text-muted-foreground hover:text-muted-foreground/80 transition-colors"
             aria-label="Tab selector to view archived tasks"
           >
-            Archive
+            归档
           </TabsTrigger>
         </TabsList>
       </div>

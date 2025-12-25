@@ -2,9 +2,7 @@ import React, { useState, useRef, useEffect, forwardRef, useImperativeHandle } f
 import {
   ChevronDown,
   Mic,
-  Send,
   Loader2,
-  Sparkles,
   Laptop,
   Square,
   Check,
@@ -24,17 +22,17 @@ import { WaveformVisualizer } from '../WaveformVisualizer';
 import { Button } from '../ui/button';
 import { Textarea } from '../ui/textarea';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
-import type { PermissionRequest, Command } from '../../types';
+import type { PermissionRequest, Command, FileSystemEntry } from '../../types';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { useAudioRecording } from '../../hooks/useAudioRecording';
 import { api } from '../../../chat/services/api';
 import { cn } from '../../lib/utils';
 
-export interface FileSystemEntry {
-  name: string;
-  type: 'file' | 'directory';
-  depth: number;
-}
+// export interface FileSystemEntry {
+//   name: string;
+//   type: 'file' | 'directory';
+//   depth: number;
+// }
 
 interface AutocompleteState {
   isActive: boolean;
@@ -403,7 +401,6 @@ export const Composer = forwardRef<ComposerRef, ComposerProps>(function Composer
     stopRecording,
     resetToIdle,
     error: audioError,
-    duration: recordingDuration,
     isSupported: isAudioSupported,
     audioData,
   } = useAudioRecording();

@@ -106,14 +106,22 @@ export interface ToolResult {
 
 // Stream status types for live updates
 export interface StreamStatus {
+  /** SSE 连接状态 */
   connectionState: 'connecting' | 'connected' | 'disconnected' | 'error';
+  /** 最近的 SSE 事件 */
   lastEvent?: StreamEvent;
+  /** 最近事件的时间戳 */
   lastEventTime?: string;
+  /** 当前对话状态 */
   currentStatus: string;
   toolMetrics?: {
+    /** 代码行数新增数 */
     linesAdded: number;
+    /** 代码行数删除数 */
     linesRemoved: number;
+    /** 读取次数 */
     editCount: number;
+    /** 写入次数 */
     writeCount: number;
   };
 }
